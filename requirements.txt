@@ -25,3 +25,5 @@ Pillow>=10.2.0
 
 # 兼容性
 protobuf<4
+
+opencv-python-headless>=4.8.0
