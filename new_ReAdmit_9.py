@@ -25,10 +25,10 @@ import requests
 @st.cache_resource
 def load_models():
     base_path = os.getcwd()
-    model = joblib.load(os.path.join(base_path, "model_0508.pkl"))
+    model = joblib.load(os.path.join(base_path, "model_0922.joblib"))
     with open(os.path.join(base_path, "pca_model.pkl"), "rb") as f:
         pca = pickle.load(f)
-    with open(os.path.join(base_path, "threshold_0508.txt"), "r") as f:
+    with open(os.path.join(base_path, "threshold_0922.txt"), "r") as f:
         threshold = float(f.read().strip())
     tokenizer = AutoTokenizer.from_pretrained("emilyalsentzer/Bio_ClinicalBERT")
     bert_model = AutoModel.from_pretrained("emilyalsentzer/Bio_ClinicalBERT")
