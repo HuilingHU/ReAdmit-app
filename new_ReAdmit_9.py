@@ -19,6 +19,31 @@ ocr = PaddleOCR(use_angle_cls=True, lang='ch')
 
 # ------------------ 页面设置 ------------------
 st.set_page_config(page_title="再入ICU风险预测工具 - ReAdmit", layout="wide")
+st.markdown("""
+<style>
+/* 页面整体字体大小和间距 */
+body, .css-18e3th9, .stApp {
+    font-size: 0.9rem;  /* 调整整体字体 */
+    line-height: 1.2;
+}
+
+/* 标题字体 */
+h1, h2, h3, h4, h5, h6 {
+    font-size: 1.2rem;
+}
+
+/* 输入框和按钮字体 */
+.stTextInput>div>input, .stNumberInput>div>input, .stButton>button, .stSelectbox>div>div {
+    font-size: 0.9rem;
+    padding: 0.25rem 0.4rem;
+}
+
+/* 表格字体 */
+.stTable td, .stTable th {
+    font-size: 0.85rem;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # ------------------ 模型加载 ------------------
 @st.cache_resource
@@ -169,7 +194,7 @@ if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
 with st.form("icu_form"):
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4 = st.columns(4, gap="small")
 
     # 基本信息
     with col1:
@@ -213,7 +238,7 @@ with st.form("icu_form"):
 
     # ---------- 检验报告上传（全宽） ----------
     st.subheader("🧪 上传检验报告")
-    col_u1, col_u2, col_u3, col_u4 = st.columns(4)
+    col_u1, col_u2, col_u3, col_u4 = st.columns(4, gap="small")
     with col_u1:
         cbc_images = st.file_uploader("血常规", type=["png","jpg","jpeg"], accept_multiple_files=True)
     with col_u2:
@@ -364,6 +389,7 @@ if submitted:
         """
         advice = ask_deepseek_online(prompt)
         st.subheader("🤖 LLM 建议")
+        with st.expander("查看详细建议", expanded=True):
         st.markdown(advice)
 
         st.session_state["messages"].append({"role":"assistant","content":advice})
