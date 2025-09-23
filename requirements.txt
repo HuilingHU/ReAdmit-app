@@ -18,7 +18,7 @@ matplotlib>=3.8.2
 # OCR
 paddleocr>=2.7.0.3
 paddlepaddle>=2.6.1
-opencv-python>=4.8.0
+opencv-python-headless>=4.8.0
 
 # 其他
 requests>=2.31.0
@@ -27,4 +27,3 @@ Pillow>=10.2.0
 # 兼容性
 protobuf<4
 
-opencv-python-headless>=4.8.0
