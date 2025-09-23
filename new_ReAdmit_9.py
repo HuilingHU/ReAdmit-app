@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 from transformers import AutoTokenizer, AutoModel
 from paddleocr import PaddleOCR
+import os
+import requests
 
 ocr = PaddleOCR(use_angle_cls=True, lang='ch')
 
@@ -19,9 +21,6 @@ ocr = PaddleOCR(use_angle_cls=True, lang='ch')
 st.set_page_config(page_title="再入ICU风险预测工具 - ReAdmit", layout="wide")
 
 # ------------------ 模型加载 ------------------
-import os
-import requests
-
 @st.cache_resource
 def load_models():
     base_path = os.getcwd()
