@@ -23,24 +23,30 @@ st.markdown("""
 <style>
 /* 页面整体字体大小和间距 */
 body, .css-18e3th9, .stApp {
-    font-size: 0.9rem;  /* 调整整体字体 */
-    line-height: 1.2;
+    font-size: 0.85rem;  /* 页面整体字体比原来更小 */
+    line-height: 1.15;
 }
 
-/* 标题字体 */
-h1, h2, h3, h4, h5, h6 {
-    font-size: 1.2rem;
+/* 页面主标题（h1）和小标题（h2~h4） */
+h1 {
+    font-size: 1.1rem;   /* 主标题稍微小一点 */
+}
+h2, h3, h4 {
+    font-size: 0.95rem;  /* 小标题进一步缩小 */
 }
 
-/* 输入框和按钮字体 */
-.stTextInput>div>input, .stNumberInput>div>input, .stButton>button, .stSelectbox>div>div {
-    font-size: 0.9rem;
-    padding: 0.25rem 0.4rem;
+/* 输入框、数字框、下拉框和按钮字体 */
+.stTextInput>div>input, 
+.stNumberInput>div>input, 
+.stButton>button, 
+.stSelectbox>div>div {
+    font-size: 0.85rem;
+    padding: 0.2rem 0.35rem;
 }
 
 /* 表格字体 */
 .stTable td, .stTable th {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -194,7 +200,7 @@ if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
 with st.form("icu_form"):
-    col1, col2, col3, col4 = st.columns(4, gap="small")
+    col1, col2, col3, col4, col5 = st.columns([0.9,0.9,0.9,0.9,1.1], gap="small")
 
     # 基本信息
     with col1:
@@ -237,24 +243,16 @@ with st.form("icu_form"):
         st.success(f"Charlson 合并症指数（含年龄加权）: {charlson_score}")
 
     # ---------- 检验报告上传（全宽） ----------
-    st.subheader("🧪 上传检验报告")
-    col_u1, col_u2, col_u3, col_u4 = st.columns(4, gap="small")
-    with col_u1:
+    with col5:
+        st.subheader("🧪 检验/放射学报告")
         cbc_images = st.file_uploader("血常规", type=["png","jpg","jpeg"], accept_multiple_files=True)
-    with col_u2:
         liver_kidney_images = st.file_uploader("肝肾功/生化", type=["png","jpg","jpeg"], accept_multiple_files=True)
-    with col_u3:
         coag_images = st.file_uploader("凝血", type=["png","jpg","jpeg"], accept_multiple_files=True)
-    with col_u4:
         abg_images = st.file_uploader("血气分析", type=["png","jpg","jpeg"], accept_multiple_files=True)
-
-    # 放射学检查
-    st.subheader("📷 放射学检查")
-    no_radiology = st.checkbox("未进行放射学检查")
-    report_image = st.file_uploader("最近一次放射学报告截图", type=["png","jpg","jpeg"], disabled=no_radiology)
+        no_radiology = st.checkbox("未进行放射学检查")
+        report_image = st.file_uploader("最近一次放射学报告截图", type=["png","jpg","jpeg"], disabled=no_radiology)
 
     submitted = st.form_submit_button("🔍 进行风险预测")
-    
     
 # ------------------ 预测 ------------------
 if submitted:
