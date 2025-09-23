@@ -389,7 +389,6 @@ if submitted:
         """
         advice = ask_deepseek_online(prompt)
         st.subheader("🤖 LLM 建议")
-        with st.expander("查看详细建议", expanded=True):
         st.markdown(advice)
 
         st.session_state["messages"].append({"role":"assistant","content":advice})
