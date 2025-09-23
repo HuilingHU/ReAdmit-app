@@ -65,7 +65,6 @@ def load_models():
     return model, pca, threshold, tokenizer, bert_model
 
 model, pca, threshold, tokenizer, bert_model = load_models()
-ocr = PaddleOCR(use_angle_cls=True, lang='ch')
 
 # ------------------ LLM 在线调用 ------------------
 def ask_deepseek_online(prompt):
@@ -109,7 +108,7 @@ def generate_embeddings(text):
 def extract_text_from_image(image_file):
     with open("temp_report.png", "wb") as f:
         f.write(image_file.getvalue())
-    result = ocr.ocr("temp_report.png", cls=True)
+    result = ocr.ocr("temp_report.png")
     full_text = " ".join([line[1][0] for line in result[0]])
 
     # ---- 文本标准化 ----
