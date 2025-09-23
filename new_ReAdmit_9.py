@@ -13,6 +13,8 @@ from io import BytesIO
 from transformers import AutoTokenizer, AutoModel
 from paddleocr import PaddleOCR
 
+ocr = PaddleOCR(use_angle_cls=True, lang='ch')
+
 # ------------------ 页面设置 ------------------
 st.set_page_config(page_title="再入ICU风险预测工具 - ReAdmit", layout="wide")
 
