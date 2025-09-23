@@ -17,9 +17,12 @@ from paddleocr import PaddleOCR
 st.set_page_config(page_title="再入ICU风险预测工具 - ReAdmit", layout="wide")
 
 # ------------------ 模型加载 ------------------
+import os
+import requests
+
 @st.cache_resource
 def load_models():
-    base_path = os.path.dirname(__file__)
+    base_path = os.getcwd()
     model = joblib.load(os.path.join(base_path, "model_0508.pkl"))
     with open(os.path.join(base_path, "pca_model.pkl"), "rb") as f:
         pca = pickle.load(f)
@@ -31,10 +34,6 @@ def load_models():
 
 model, pca, threshold, tokenizer, bert_model = load_models()
 ocr = PaddleOCR(use_angle_cls=True, lang='ch')
-
-# ------------------ LLM 调用 ------------------
-import os
-import requests
 
 # ------------------ LLM 在线调用 ------------------
 def ask_deepseek_online(prompt):
