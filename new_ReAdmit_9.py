@@ -19,11 +19,11 @@ st.set_page_config(page_title="再入ICU风险预测工具 - ReAdmit", layout="w
 # ------------------ 模型加载 ------------------
 @st.cache_resource
 def load_models():
-    base_path = "/Users/huhuiling/Desktop/icu_readmission_app"
-    model = joblib.load(f"{base_path}/model_0508.pkl")
-    with open(f"{base_path}/pca_model.pkl", "rb") as f:
+    base_path = os.path.dirname(__file__)
+    model = joblib.load(os.path.join(base_path, "model_0508.pkl"))
+    with open(os.path.join(base_path, "pca_model.pkl"), "rb") as f:
         pca = pickle.load(f)
-    with open(f"{base_path}/threshold_0508.txt", "r") as f:
+    with open(os.path.join(base_path, "threshold_0508.txt"), "r") as f:
         threshold = float(f.read().strip())
     tokenizer = AutoTokenizer.from_pretrained("emilyalsentzer/Bio_ClinicalBERT")
     bert_model = AutoModel.from_pretrained("emilyalsentzer/Bio_ClinicalBERT")
@@ -33,12 +33,29 @@ model, pca, threshold, tokenizer, bert_model = load_models()
 ocr = PaddleOCR(use_angle_cls=True, lang='ch')
 
 # ------------------ LLM 调用 ------------------
-def ask_deepseek_local(prompt):
-    payload = {"model": "deepseek-r1:latest", "prompt": prompt, "stream": False}
+import os
+import requests
+
+# ------------------ LLM 在线调用 ------------------
+def ask_deepseek_online(prompt):
+    url = "https://api.deepseek.com/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {os.getenv('DEEPSEEK_API_KEY')}",  # 在部署环境配置API Key
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "deepseek-chat",   # 或 deepseek-reasoner，根据你需要的模型
+        "messages": [
+            {"role": "system", "content": "你是一个医学助手，提供风险解读和临床建议。"},
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.7
+    }
     try:
-        r = requests.post("http://localhost:11434/api/generate", json=payload)
+        r = requests.post(url, headers=headers, json=payload, timeout=60)
         r.raise_for_status()
-        return r.json().get("response", "无法获取建议，请检查本地LLM服务。")
+        data = r.json()
+        return data["choices"][0]["message"]["content"].strip()
     except Exception as e:
         return f"LLM调用失败：{e}"
 
@@ -345,7 +362,7 @@ if submitted:
         2. 三条可行的临床干预建议（每条附简短理由）
         3. 三篇相关文献（标题 + 期刊 + 年份）
         """
-        advice = ask_deepseek_local(prompt)
+        advice = ask_deepseek_online(prompt)
         st.subheader("🤖 LLM 建议")
         st.markdown(advice)
 
@@ -361,6 +378,6 @@ if st.button("发送问题"):
     if user_q:
         st.session_state["messages"].append({"role":"user","content":user_q})
         history_prompt = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state["messages"]])
-        resp = ask_deepseek_local(history_prompt)
+        resp = ask_deepseek_online(history_prompt)
         st.session_state["messages"].append({"role":"assistant","content":resp})
         st.write(resp)
