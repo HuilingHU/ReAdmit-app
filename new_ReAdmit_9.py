@@ -162,35 +162,6 @@ def calculate_charlson_score(age, selections):
         score += ((age - 40) // 10) + 1
     return score
 
-# ------------------ SHAP 解释 ------------------
-def predict_with_shap(model, structured_array, bert_pca_vec):
-    X = np.hstack([structured_array, bert_pca_vec])
-    prob = float(model.predict_proba(X)[0][1])
-
-    try:
-        explainer = shap.Explainer(model)
-        shap_values = explainer(X)   # 这里传入单个样本也可以
-        vals = shap_values.values[0]
-        
-        # 如果没有 feature_names，就自己生成
-        feature_names = shap_values.feature_names
-        if feature_names is None:
-            feature_names = [f"feature_{i}" for i in range(X.shape[1])]
-
-        idx = np.argsort(-np.abs(vals))[:10]
-        top_features = [(feature_names[i], float(vals[i])) for i in idx]
-
-        plt.figure(figsize=(6, 4))
-        shap.plots.bar(shap_values[0], max_display=10, show=False)
-        buf = BytesIO()
-        plt.savefig(buf, format="png", bbox_inches="tight")
-        buf.seek(0)
-        plt.close()
-        return prob, top_features, buf
-    except Exception as e:
-        print("SHAP 计算失败:", e)
-        return prob, [], None
-
 # ------------------ 页面 UI ------------------
 st.title("再入ICU 风险预测工具 - ReAdmit")
 st.warning("⚠️ 上传报告截图/照片前请务必隐去敏感信息。")
@@ -318,17 +289,11 @@ if submitted:
         ] + lab_inputs).reshape(1, -1)
         final_input = np.hstack([input_values, embeddings_reduced])
 
-        # 预测 + SHAP
+        # 预测
         prob, top_features, shap_buf = predict_with_shap(model, input_values, embeddings_reduced)
         result = "自ICU转出到病房后72小时再入ICU的风险较高" if prob >= threshold else "自ICU转出到病房后72小时再入ICU的风险较低"
         st.subheader("📊 预测结果")
         st.write(f"风险分类结果：**{result}**")
-
-        st.subheader("🔎 SHAP 解释")
-        if top_features:
-            st.table([{ "feature": f, "shap_value": v } for f, v in top_features])
-        if shap_buf:
-            st.image(shap_buf)
        
         # LLM 建议
         # -------- 整理患者信息 --------
@@ -366,7 +331,7 @@ if submitted:
         else:
             patient_summary += "- 未提取到实验室指标\n"
 
-        # -------- 模型预测 & SHAP --------
+        # -------- 模型预测 --------
         patient_summary += f"\n模型预测结果: {result}\n"
 
         shap_text = "\n".join([f"{i+1}. {f}: {v:.3f}" for i, (f, v) in enumerate(top_features)])
@@ -376,8 +341,6 @@ if submitted:
         {patient_summary}
 
         模型预测结果: {result} 
-        主要贡献特征 (SHAP 排名前列): 
-        {shap_text}
 
         请根据以上信息提供:
         1. 简要解释风险结果（结合患者的临床特征、实验室检查和合并症情况）
