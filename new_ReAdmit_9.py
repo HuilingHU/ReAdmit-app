@@ -7,13 +7,9 @@ import re
 import torch
 import joblib
 import requests
-import shap
-import matplotlib.pyplot as plt
-from io import BytesIO
 from transformers import AutoTokenizer, AutoModel
 from paddleocr import PaddleOCR
 import os
-import requests
 
 ocr = PaddleOCR(use_angle_cls=True, lang='ch')
 
@@ -290,7 +286,8 @@ if submitted:
         final_input = np.hstack([input_values, embeddings_reduced])
 
         # 预测
-        result = "自ICU转出到病房后72小时再入ICU的风险较高" if prob >= threshold else "自ICU转出到病房后72小时再入ICU的风险较低"
+        prob = model.predict_proba(final_input)[0,1]
+        result = "自ICU转出到病房后72小时再入ICU的风险：高" if prob >= threshold else "自ICU转出到病房后72小时再入ICU的风险：低"
         st.subheader("📊 预测结果")
         st.write(f"风险分类结果：**{result}**")
        
@@ -332,8 +329,6 @@ if submitted:
 
         # -------- 模型预测 --------
         patient_summary += f"\n模型预测结果: {result}\n"
-
-        shap_text = "\n".join([f"{i+1}. {f}: {v:.3f}" for i, (f, v) in enumerate(top_features)])
 
         prompt = f"""
         患者情况如下:
