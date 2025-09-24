@@ -290,7 +290,6 @@ if submitted:
         final_input = np.hstack([input_values, embeddings_reduced])
 
         # 预测
-        prob, top_features, shap_buf = predict_with_shap(model, input_values, embeddings_reduced)
         result = "自ICU转出到病房后72小时再入ICU的风险较高" if prob >= threshold else "自ICU转出到病房后72小时再入ICU的风险较低"
         st.subheader("📊 预测结果")
         st.write(f"风险分类结果：**{result}**")
